@@ -247,7 +247,22 @@ function Invoke-Winget {
     if ($stdout) { Write-Log $stdout.Trim() }
     if ($stderr) { Write-Log $stderr.Trim() "WARN" }
 
-    return $proc.ExitCode
+    $exit = $proc.ExitCode
+    $combined = $stdout + "`n" + $stderr
+    $patterns = @(
+        'No installed package found',
+        'No package found matching input criteria',
+        'More help can be found'
+    )
+    foreach ($p in $patterns) {
+        if ($combined -match [regex]::Escape($p)) {
+            Write-Log "winget output indicates failure: $p" "WARN"
+            if ($exit -eq 0) { $exit = 1 }
+            break
+        }
+    }
+
+    return $exit
 }
 
 function Uninstall-App {
