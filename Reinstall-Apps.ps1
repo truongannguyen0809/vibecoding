@@ -230,7 +230,11 @@ function Invoke-Winget {
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "winget"
-    $psi.ArgumentList.AddRange($Args)
+    if ($psi.PSObject.Properties.Name -contains 'ArgumentList' -and $null -ne $psi.ArgumentList) {
+        $psi.ArgumentList.AddRange($Args)
+    } else {
+        $psi.Arguments = ($Args -join ' ')
+    }
     $psi.UseShellExecute = $false
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError  = $true
